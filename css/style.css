@@ -511,3 +511,25 @@ footer .footer-bottom p, footer .footer-bottom p a {
     zoom: 0.5;
     -moz-transform: scale(0.5);
 }
+
+
+
+
+#waitDiv {
+    position:fixed;
+    text-align:center;
+     z-index: 10000;
+    top: 50%;
+    left: 50%;
+    width:30em;
+    height:5em;
+    margin-top: -9em; /*set to a negative number 1/2 of your height*/
+    margin-left: -15em; /*set to a negative number 1/2 of your width*/
+    border: 1px solid #ccc;
+    font-size:x-large;
+    background-color: #f3f3f3;
+}
+
+#blurb {
+    white-space: pre-wrap;
+}
