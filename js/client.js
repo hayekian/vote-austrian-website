@@ -1,11 +1,11 @@
-﻿
+
 var RACES;
 var WEB_API;
 var LOCAL_TESTING = false; 
-if (window.location.href.indexOf('austrian') > 0 || LOCAL_TESTING == false)
+//if (window.location.href.indexOf('austrian') > 0 || LOCAL_TESTING == false)
     WEB_API = 'https://0ro19k4iz0.execute-api.us-east-1.amazonaws.com/prod';
-else
-    WEB_API = '/commands';
+//else
+//    WEB_API = '/commands';
 var USER_INFO;
 var ROOT;
 var AngApp = angular.module('Elections', ['ngRoute', 'ngSanitize', 'ngDialog']);
@@ -97,10 +97,28 @@ AngApp.controller('MainCtrl', ['$scope', '$route', '$http', '$location', '$windo
                 controller: ['$scope', function ($scope) {
                         
                         $scope.user = CURRENT_USER;
+                        if ($scope.user.info.website != null) { 
+                        
+                            if ($scope.user.info.website.indexOf('http') < 0) {       
+                                $scope.weblink = "http://" + $scope.user.info.website;
+                            }
+                            else {
+                                $scope.weblink = $scope.user.info.website;
+                            }
+                        }
 
                     }]
             });
-        };   
+        };
+
+
+        $scope.DisplayWaitBanner = function () {
+            $scope.ShowWaitBanner = true;
+        }
+        $scope.HideWaitBanner = function () {       
+            $scope.ShowWaitBanner = false;
+        }
+
        
     }
 ]).controller('CtrlAbout',
@@ -129,6 +147,17 @@ AngApp.controller('MainCtrl', ['$scope', '$route', '$http', '$location', '$windo
             return;
         }
         
+        $scope.States = [];
+
+        var myOpts = document.getElementById('States').options;
+        
+        for (var i = 0; i < myOpts.length; i++) {
+            $scope.States.push({ text: myOpts[i].text, value: myOpts[i].value });
+        }
+        
+        
+
+
         $scope.Page = 'MySettings';
         $scope.UserInfo = USER_INFO;
         
@@ -152,10 +181,35 @@ AngApp.controller('MainCtrl', ['$scope', '$route', '$http', '$location', '$windo
         
         $scope.UpdateChoices = function () {
             
+            if (RACES == null) return;
+            
+            if ($scope.RaceType == "S") {             
+                $('#States').find('option').remove().end();               
+                var x = document.getElementById("States");
+               
+                var options = [];
+                for (var state in RACES.SenateRaces) {
+                    var st = Enumerable.From($scope.States).Where("$.value == '" + state + "'").FirstOrDefault();
+                    var option = document.createElement("option");
+                    option.text = st.text;
+                    option.value = st.value;
+                    options.push(option);
+                }
+
+                options = Enumerable.From(options).OrderBy("$.text").ToArray();
+                options.forEach(function (item) { x.add(item); });
+
+                $('#States').val($scope.RaceState);
+              
+            }
+           
+
             if ($scope.RaceType == 'H' || $scope.RaceType == 'S') {
-                $scope.states = Enumerable.From(RACES).Select("$.state").Distinct().ToArray();
                 $scope.districts = Enumerable.From(RACES).Where("$.state == '" + $scope.RaceState + "'").Select("$.district").ToArray().sort();
             }
+
+           
+
         };
         
         $scope.$watchGroup(['RaceType', 'RaceState'], function (old, ne) {
