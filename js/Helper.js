@@ -1,4 +1,4 @@
-﻿function jq_cmd(cmdName, data, next) { 
+function jq_cmd(cmdName, data, next) { 
 
     var cmd = {};
     cmd.cmd = cmdName;
