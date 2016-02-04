@@ -1,4 +1,4 @@
-﻿
+
 var REFRESH_DATE = new Date();
 var RACES;
 var USERS;
@@ -7,11 +7,14 @@ var DB = {};
 function CtrlCandidates($scope, $route, $http, $location, $window, ngDialog) {
     HTTP = $http;
     $scope.Page = 'Candidates';
-     
+    
+    $scope.DisplayWaitBanner();
+
     var time_since_last_update = ( (new Date()).getTime() - REFRESH_DATE.getTime() ) / 1000;
 
     if (RACES != null && time_since_last_update < 30) {
         UpdateTable();
+        $scope.HideWaitBanner();
     }
     else {
         _COMMAND("GetData", null, function (response) {
@@ -21,6 +24,7 @@ function CtrlCandidates($scope, $route, $http, $location, $window, ngDialog) {
             else {
                 PrepareData(response.data);
                 UpdateTable();
+                $scope.HideWaitBanner();
             }
         });
     }
@@ -33,6 +37,7 @@ function PrepareData(data) {
 
     DB = data;
     RACES = data.Incumbents;
+
     USERS = data.Users;
     USERS.forEach(function (elem) {
         // create hash of race ids to users runing in them         
@@ -45,13 +50,33 @@ function PrepareData(data) {
             DB[elem.race_id].push(elem);
     });
     // for every race use the race_id in global hash to see if there are candidates running there... if they are add reference to them in this race
+    
+    RACES.SenateRaces = {};
+    RACES.StateDistricts = {};
+
     RACES.forEach(function (elem) {
+        
+      
+
+        if (elem.race == 'S' && RACES.SenateRaces[elem.state] == null) {
+            var s = elem.state;
+            var l = s.length;
+            RACES.SenateRaces[elem.state] = elem;
+
+        }
+        if (RACES.StateDistricts[elem.state] == null)
+            RACES.StateDistricts[elem.state] = [];
+        RACES.StateDistricts[elem.state].push(elem.district);
+
+
         if (DB[elem.race_id] != null) {
             elem.Austrians = CreateAustriansList(DB[elem.race_id]);
         }
         else
             elem.Austrians = "";
     });
+    
+   
     REFRESH_DATE = new Date();         
 
 }
